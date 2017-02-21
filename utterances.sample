@@ -1,0 +1,5 @@
+# Take a look at https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/defining-the-voice-interface
+cloneJob clone {id}
+cloneJob clone number {id}
+restartJob restart number {id}
+restartJob restart {id}

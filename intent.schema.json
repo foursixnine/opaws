@@ -1,0 +1,26 @@
+//* 
+// This will define routes and how they are parsed
+// https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/defining-the-voice-interface
+//
+{
+  "intents": [
+    {
+      "intent": "cloneJob",
+      "slots": [
+        {
+          "name": "id",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "restartJob",
+      "slots": [
+        {
+          "name": "id",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    }
+  ]
+}
