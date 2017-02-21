@@ -1,0 +1,68 @@
+#!/usr/bin/env perl
+use Mojolicious::Lite;
+use Mojo::Log;
+my $log = Mojo::Log->new;
+
+# Documentation browser under "/perldoc"
+plugin 'PODRenderer';
+
+get '/' => sub {
+  my $c = shift;
+  $c->render(template => 'index');
+};
+
+get '/clone/:id/:src_ḧost/' => sub {
+  my $c = shift;
+  my $job_id = $c->param('id');
+  my $src_ḧost = "https://".$c->param('src_ḧost').".opensuse.org";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_ḧost $job_id --host deimos.suse.de";
+  $log->debug($cmd);
+  my $response = `$cmd`;
+
+  #$response ~/#/Number/
+  #$response s/:/ [0]
+  $c->stash(response => $response);
+  $c->render(template => 'clone');
+};
+
+get '/restart/job/:id' => sub {
+  my $c = shift;
+  my $job_id = $c->param('id');
+  my $src_ḧost = "https://".$c->param('src_ḧost').".opensuse.org";
+  my $cmd = "/usr/share/openqa/script/client --host deimos.suse.de jobs/$job_id retart";
+  $log->debug($cmd);
+  my $response = json_decode(`$cmd`);
+
+  #$response ~/#/Number/
+  #$response s/:/ [0]
+  $c->stash(job_id => $response->job->id);
+  $c->render(template => 'restart_job');
+};
+
+app->start;
+__DATA__
+
+@@ index.html.ep
+% layout 'default';
+% title 'Insdsdex';
+<h1>Clone Job</h1>
+bleh
+
+@@ clone.html.ep
+% layout 'default';
+% title 'clone';
+<h1>Clone Job</h1>
+<h2><%= $response %></h2>
+
+@@ restart_job.html.ep
+% layout 'default';
+% title 'restart job';
+<h1>Restarted job</h1>
+<h2><%= $job_id %></h2>
+
+@@ layouts/default.html.ep
+<!DOCTYPE html>
+<html>
+  <head><title><%= title %></title></head>
+  <body><%= content %></body>
+</html>
