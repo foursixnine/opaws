@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 use Mojo::Log;
+use JSON;
+use Data::Dumper;
 my $log = Mojo::Log->new;
 
 # Documentation browser under "/perldoc"
@@ -21,6 +23,9 @@ get '/clone/:id/:src_ḧost/' => sub {
 
   #$response ~/#/Number/
   #$response s/:/ [0]
+  $response =~ s/#/Number/;
+  ($response) =~ /:/;
+
   $c->stash(response => $response);
   $c->render(template => 'clone');
 };
@@ -28,15 +33,20 @@ get '/clone/:id/:src_ḧost/' => sub {
 get '/restart/job/:id' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $src_ḧost = "https://".$c->param('src_ḧost').".opensuse.org";
-  my $cmd = "/usr/share/openqa/script/client --host deimos.suse.de jobs/$job_id retart";
+  my $cmd = "/usr/share/openqa/script/client --json-output --host deimos.suse.de jobs/$job_id restart";
   $log->debug($cmd);
-  my $response = json_decode(`$cmd`);
+  my $job = `$cmd`;
 
-  #$response ~/#/Number/
-  #$response s/:/ [0]
-  $c->stash(job_id => $response->job->id);
-  $c->render(template => 'restart_job');
+  $job = decode_json($job);
+  $log->debug(Dumper($job));
+
+  if ($job->{job}->{id}){
+    $c->stash(job_id => $job->{job}->{id});
+    $c->render(template => 'restart_job');
+  } else {
+    $c->redirect_to("/");
+  }
+
 };
 
 app->start;
@@ -57,8 +67,8 @@ bleh
 @@ restart_job.html.ep
 % layout 'default';
 % title 'restart job';
-<h1>Restarted job</h1>
-<h2><%= $job_id %></h2>
+<h1>job restarted</h1>
+<h2>Restarted <%= $job_id %></h2>
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
