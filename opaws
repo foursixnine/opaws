@@ -50,6 +50,9 @@ get '/restart/job/:id' => sub {
 };
 
 app->start;
+
+# All responses should be a combination between json and ssml tags
+# https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference
 __DATA__
 
 @@ index.html.ep
