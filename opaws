@@ -17,8 +17,7 @@ get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
   my $src_host = "https://openqa.".$c->param('src_host').".org";
-  my $cmd = "echo -e '/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id'";
-  #my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
   $log->debug($cmd);
   my $json = generate_json_response("Cloned job $job_id");
 
@@ -35,7 +34,6 @@ get '/restart/job/:id' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
   my $cmd = "/usr/share/openqa/script/client --json-output jobs/$job_id/restart post";
-  #my $cmd = "echo '/usr/share/openqa/script/client --json-output jobs/$job_id/restart post'";
   $log->debug($cmd);
   my $response = decode_json(`$cmd`);
   my @jobresult = $response->{result};
@@ -81,8 +79,7 @@ __DATA__
 @@ index.html.ep
 % layout 'default';
 % title 'OpenQA Alexa Web Service (OpAWS)';
-<h1>Clone Job</h1>
-bleh
+<h1>Welcome to OpAWS</h1>
 
 @@ clone.html.ep
 % layout 'default';
