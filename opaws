@@ -13,11 +13,11 @@ get '/' => sub {
   $c->render(template => 'index');
 };
 
-get '/clone/:id/:src_ḧost/' => sub {
+get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $src_ḧost = "https://".$c->param('src_ḧost').".opensuse.org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_ḧost $job_id --host deimos.suse.de";
+  my $src_host = "https://".$c->param('src_host').".opensuse.org";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_host $job_id --host deimos.suse.de";
   $log->debug($cmd);
   my $response = `$cmd`;
 
