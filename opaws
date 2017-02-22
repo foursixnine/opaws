@@ -17,7 +17,7 @@ get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
   my $src_host = "https://".$c->param('src_host').".opensuse.org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_host $job_id --host deimos.suse.de";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_host $job_id";
   $log->debug($cmd);
   my $response = `$cmd`;
 
@@ -33,7 +33,7 @@ get '/clone/:id/:src_host/' => sub {
 get '/restart/job/:id' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $cmd = "/usr/share/openqa/script/client --json-output --host deimos.suse.de jobs/$job_id/restart post";
+  my $cmd = "/usr/share/openqa/script/client --json-output jobs/$job_id/restart post";
   $log->debug($cmd);
   my $response = decode_json(`$cmd`);
   my @jobresult = $response->{result};
