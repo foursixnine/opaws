@@ -1,33 +1,58 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 use Mojo::Log;
-use JSON;
+use Mojo::JSON qw(decode_json encode_json);
+use JSON; #needs cleanup
 use Data::Dumper;
 my $log = Mojo::Log->new;
 
 # Documentation browser under "/perldoc"
 plugin 'PODRenderer';
 
-get '/' => sub {
+=head2 routes
+  predefined routes and proper handling:
+=cut
+
+post '/' => sub {
   my $c = shift;
-  $c->render(template => 'index');
-};
+  my $response;
+  my $wscall = $c->req->json;
+  my $intent = $wscall->{request}->{intent}->{name};
+  my $slots  = $wscall->{request}->{intent}->{slots}; 
 
-get '/clone/:id/:src_host/' => sub {
-  my $c = shift;
-  my $job_id = $c->param('id');
-  my $src_host = "https://openqa.".$c->param('src_host').".org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
-  $log->debug($cmd);
-  my $json = generate_json_response("Cloned job $job_id");
+  $log->debug(Dumper($wscall));
 
-  my $response = `$cmd`;
-  $response =~ s/#/Number/;
-  ($response) =~ /:/;
+  if ( $intent eq "cloneJob" ) {
+    my $src_host = $slots->{src}->{value};
+    my $job_id = $slots->{id}->{value};
+    $src_host = "https://openqa.".$src_host.".org";
 
-  $c->stash(response => $response);
-  $c->stash(json => $json);
-  $c->render(template => 'clone');
+    $response = clone_job($job_id, $src_host);
+    $log->debug($response);
+    
+    # should be
+    #$json = generate_json_response($response);
+     my $json = '{
+        "version": "0.1",
+        "response": {
+          "outputSpeech": {
+            "type": "PlainText",
+            "text": "'.$response.'"
+          }
+        }
+      }';
+
+   # "ssml": "<speak>'.$response.'</speak>"
+    $log->debug($json);
+   my $ws_response = decode_json($json);
+    
+    $log->debug(Dumper($ws_response));
+    $c->render(json => $ws_response);
+    $c->rendered(200);
+    $response = undef;
+
+  }
+  #$c->render(template => 'index') unless ($response);
 };
 
 get '/restart/job/:id' => sub {
@@ -55,8 +80,20 @@ get '/restart/job/:id' => sub {
 
 };
 
-app->secrets(["Skynet is comming! :)"]);
-app->start;
+=head2 helper functions
+  functions for actually interacting with stuff
+=cut
+
+sub clone_job {
+  my ($job_id, $src_host) = @_;
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
+  $log->debug($cmd);
+  my $json = generate_json_response("Cloned job $job_id");
+  my $response = `$cmd`;
+  $response =~ s/#/Number /;
+  ($response) = split /:/, $response;
+  return $response;
+}
 
 sub generate_json_response {
     my $input = shift;
@@ -71,6 +108,9 @@ sub generate_json_response {
 
     return JSON->new->pretty->encode($raw_response);
 }
+
+app->secrets(["Skynet is comming! :)"]);
+app->start;
 
 # All responses should be a combination between json and ssml tags
 # https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference
