@@ -33,15 +33,17 @@ get '/clone/:id/:src_ḧost/' => sub {
 get '/restart/job/:id' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $cmd = "/usr/share/openqa/script/client --json-output --host deimos.suse.de jobs/$job_id restart";
+  my $cmd = "/usr/share/openqa/script/client --json-output --host deimos.suse.de jobs/$job_id/restart post";
   $log->debug($cmd);
-  my $job = `$cmd`;
+  my $response = decode_json(`$cmd`);
+  my @jobresult = $response->{result};
+  # $job = decode_json($job);
+  $log->debug(Dumper($jobresult[0]));
+  $log->debug(scalar \@jobresult);
 
-  $job = decode_json($job);
-  $log->debug(Dumper($job));
-
-  if ($job->{job}->{id}){
-    $c->stash(job_id => $job->{job}->{id});
+  if ($jobresult[0]){
+    $c->stash(jobs => $response->{result});
+    $c->stash(parent_id => $job_id);
     $c->render(template => 'restart_job');
   } else {
     $c->redirect_to("/");
@@ -70,8 +72,10 @@ bleh
 @@ restart_job.html.ep
 % layout 'default';
 % title 'restart job';
-<h1>job restarted</h1>
-<h2>Restarted <%= $job_id %></h2>
+<h1>job <%= $parent_id %> restarted</h1>
+% for my $job (@$jobs) {
+    <p>Job <%=$job %> has been triggered<p>
+% }
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
