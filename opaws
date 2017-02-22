@@ -16,17 +16,17 @@ get '/' => sub {
 get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $src_host = "https://".$c->param('src_host').".opensuse.org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_host $job_id";
+  my $src_host = "https://openqa.".$c->param('src_host').".org";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
   $log->debug($cmd);
-  my $response = `$cmd`;
+  my $out = generate_speech("Cloned job $job_id");
 
-  #$response ~/#/Number/
-  #$response s/:/ [0]
+  my $response = `$cmd`;
   $response =~ s/#/Number/;
   ($response) =~ /:/;
 
   $c->stash(response => $response);
+  $c->stash(out => $out);
   $c->render(template => 'clone');
 };
 
@@ -38,12 +38,16 @@ get '/restart/job/:id' => sub {
   my $response = decode_json(`$cmd`);
   my @jobresult = $response->{result};
   # $job = decode_json($job);
-  $log->debug(Dumper($jobresult[0]));
-  $log->debug(scalar \@jobresult);
+  #$log->debug(Dumper($jobresult[0]));
+  #$log->debug(scalar \@jobresult);
+
+  my $out = generate_speech("Restarted job $job_id");
+  $log->debug(Dumper($out));
 
   if ($jobresult[0]){
     $c->stash(jobs => $response->{result});
     $c->stash(parent_id => $job_id);
+    $c->stash(out => $out);
     $c->render(template => 'restart_job');
   } else {
     $c->redirect_to("/");
@@ -51,7 +55,20 @@ get '/restart/job/:id' => sub {
 
 };
 
+app->secrets(["Skynet is comming! :)"]);
 app->start;
+
+sub generate_speech {
+    my $input = shift;
+    my $speech = {
+        outputSpeech => {
+            type => "SSML",
+            ssml => "<speak>$input</speak>",
+            }
+        };
+
+    return encode_json($speech);
+}
 
 # All responses should be a combination between json and ssml tags
 # https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference
@@ -59,15 +76,16 @@ __DATA__
 
 @@ index.html.ep
 % layout 'default';
-% title 'Insdsdex';
+% title 'OpenQA Alexa Web Service (OpAWS)';
 <h1>Clone Job</h1>
 bleh
 
 @@ clone.html.ep
 % layout 'default';
-% title 'clone';
+% title 'Clone job';
 <h1>Clone Job</h1>
 <h2><%= $response %></h2>
+<p><%= $out %><p>
 
 @@ restart_job.html.ep
 % layout 'default';
@@ -76,6 +94,7 @@ bleh
 % for my $job (@$jobs) {
     <p>Job <%=$job %> has been triggered<p>
 % }
+<p><%= $out %><p>
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
