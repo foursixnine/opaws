@@ -17,14 +17,17 @@ get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
   my $src_host = "https://openqa.".$c->param('src_host').".org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
+  my $cmd = "echo -e '/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id'";
+  #my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
   $log->debug($cmd);
+  my $json = generate_json_response("Cloned job $job_id");
 
   my $response = `$cmd`;
   $response =~ s/#/Number/;
   ($response) =~ /:/;
 
   $c->stash(response => $response);
+  $c->stash(json => $json);
   $c->render(template => 'clone');
 };
 
@@ -32,16 +35,21 @@ get '/restart/job/:id' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
   my $cmd = "/usr/share/openqa/script/client --json-output jobs/$job_id/restart post";
+  #my $cmd = "echo '/usr/share/openqa/script/client --json-output jobs/$job_id/restart post'";
   $log->debug($cmd);
   my $response = decode_json(`$cmd`);
   my @jobresult = $response->{result};
   # $job = decode_json($job);
-  $log->debug(Dumper($jobresult[0]));
-  $log->debug(scalar \@jobresult);
+  #$log->debug(Dumper($jobresult[0]));
+  #$log->debug(scalar \@jobresult);
+
+  my $json = generate_json_response("I have restarted job $job_id for you");
+  $log->debug("Generated json:\n" . $json);
 
   if ($jobresult[0]){
     $c->stash(jobs => $response->{result});
     $c->stash(parent_id => $job_id);
+    $c->stash(json => $json);
     $c->render(template => 'restart_job');
   } else {
     $c->redirect_to("/");
@@ -51,6 +59,20 @@ get '/restart/job/:id' => sub {
 
 app->secrets(["Skynet is comming! :)"]);
 app->start;
+
+sub generate_json_response {
+    my $input = shift;
+    my $raw_response = {
+        response => {
+            outputSpeech => {
+                type => "SSML",
+                ssml => "<speak>$input</speak>",
+                }
+            }
+        };
+
+    return JSON->new->pretty->encode($raw_response);
+}
 
 # All responses should be a combination between json and ssml tags
 # https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference
@@ -67,6 +89,7 @@ bleh
 % title 'Clone job';
 <h1>Clone Job</h1>
 <h2><%= $response %></h2>
+<p><%= $json %><p>
 
 @@ restart_job.html.ep
 % layout 'default';
@@ -75,6 +98,7 @@ bleh
 % for my $job (@$jobs) {
     <p>Job <%=$job %> has been triggered<p>
 % }
+<p><%= $json %><p>
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
