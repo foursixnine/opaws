@@ -16,13 +16,11 @@ get '/' => sub {
 get '/clone/:id/:src_host/' => sub {
   my $c = shift;
   my $job_id = $c->param('id');
-  my $src_host = "https://".$c->param('src_host').".opensuse.org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --skip-download --from $src_host $job_id";
+  my $src_host = "https://openqa.".$c->param('src_host').".org";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
   $log->debug($cmd);
-  my $response = `$cmd`;
 
-  #$response ~/#/Number/
-  #$response s/:/ [0]
+  my $response = `$cmd`;
   $response =~ s/#/Number/;
   ($response) =~ /:/;
 
@@ -51,6 +49,7 @@ get '/restart/job/:id' => sub {
 
 };
 
+app->secrets(["Skynet is comming! :)"]);
 app->start;
 
 # All responses should be a combination between json and ssml tags
@@ -59,13 +58,13 @@ __DATA__
 
 @@ index.html.ep
 % layout 'default';
-% title 'Insdsdex';
+% title 'OpenQA Alexa Web Service (OpAWS)';
 <h1>Clone Job</h1>
 bleh
 
 @@ clone.html.ep
 % layout 'default';
-% title 'clone';
+% title 'Clone job';
 <h1>Clone Job</h1>
 <h2><%= $response %></h2>
 
