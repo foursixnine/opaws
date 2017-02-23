@@ -55,7 +55,7 @@ post '/' => sub {
 
 sub restart_job {
   my ($job_id, $src_host) = @_;
-  $src_host = "https://openqa.".$src_host.".org";
+  $src_host = "https://openqa.eureka.lab.zarate.net.ve";
   my $cmd = "/usr/share/openqa/script/client jobs/$job_id/restart post";
   $log->debug($cmd);
   my $response = `$cmd`;
