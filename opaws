@@ -35,7 +35,16 @@ post '/' => sub {
     $log->debug($ws_response);
     render_json($c, $ws_response);
   } 
+  elsif ( $intent eq "restartJob" ) {
+    $response = restart_job($job_id, $src_host);
+    $log->debug($response);
     
+    my $json = generate_json_response($response);
+    $log->debug($response);
+    
+    my $ws_response = decode_json($json);
+    $log->debug($ws_response);
+    render_json($c, $ws_response);
   }
   $response = undef;
 };
@@ -43,6 +52,17 @@ post '/' => sub {
 =head2 helper functions
   functions for actually interacting with stuff
 =cut
+
+sub restart_job {
+  my ($job_id, $src_host) = @_;
+  $src_host = "https://openqa.".$src_host.".org";
+  my $cmd = "/usr/share/openqa/script/client --json-output jobs/$job_id/restart post";
+  $log->debug($cmd);
+  my $response = `$cmd`;
+  $response =~ s/#/Number /;
+  ($response) = split /:/, $response;
+  return $response;
+}
 
 sub clone_job {
   my ($job_id, $src_host) = @_;
@@ -87,7 +107,6 @@ __DATA__
 % layout 'default';
 % title 'OpenQA Alexa Web Service (OpAWS)';
 <h1>Welcome to OpAWS</h1>
-
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
