@@ -22,7 +22,7 @@ post '/' => sub {
   my $slots  = $wscall->{request}->{intent}->{slots}; 
 
 
-  $log->debug("wscall: ". Dumper($wscall));
+  #$log->debug("wscall: ". Dumper($wscall));
 
   if ( $intent eq "cloneJob" ) {
 
@@ -38,6 +38,13 @@ post '/' => sub {
   elsif ( $intent eq "restartJob" ) {
     my $job_id = $slots->{id}->{value};
     $response = restart_job($job_id);
+    my $ws_response = generate_json_response($response);
+    $log->debug("ws_response: ".$ws_response);
+    render_json($c, $ws_response);
+  }
+  elsif ( $intent eq "cancelJob" ) {
+    my $job_id = $slots->{id}->{value};
+    $response = cancel_job($job_id);
     my $ws_response = generate_json_response($response);
     $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
@@ -65,6 +72,24 @@ get '/rss/job/:id' => sub {
 =head2 helper functions
   functions for actually interacting with stuff
 =cut
+
+sub cancel_job {
+  my ($job_id) = @_;
+  my $job_query = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'"; 
+  $log->debug("job_query: ".$job_query);
+  my $job_state = `$job_query`;
+  my $response = '';
+  $log->debug("job_state: ".$job_state);
+  if ($job_state =~ /scheduled|running/) {
+    my $cmd = "/usr/share/openqa/script/client jobs/$job_id/cancel post";
+    $response = "Cancelled $job_state job $job_id";
+  }
+  else {
+      $response = "I can not cancel job $job_id because it is in state $job_state";
+  }
+
+  return $response;
+}
 
 sub restart_job {
   my ($job_id) = @_;
@@ -119,6 +144,7 @@ sub generate_json_response {
          }
        }
      }';
+     $log->debug(Dumper($json));
     
      return from_json($json);
 }
