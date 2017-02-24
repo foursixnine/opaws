@@ -84,6 +84,8 @@ sub delete_job {
   my $response = '';
   my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id delete";
   my $ret = `$cmd`;
+  $log->debug("cmd: ".$cmd);
+  $log->debug("return: ".$ret);
   $log->debug("ret: ".$ret);
   if ($ret =~ /.*error.*/) {
       $response = "I can not delete job $job_id";
