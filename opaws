@@ -4,6 +4,8 @@ use Mojo::Log;
 use Mojo::JSON qw(decode_json encode_json from_json);
 #use JSON;
 use Data::Dumper;
+use Mojo::UserAgent;
+
 my $log = Mojo::Log->new;
 
 # Documentation browser under "/perldoc"
@@ -56,22 +58,11 @@ post '/' => sub {
     render_json($c, $ws_response);
   }
 
-};
-
-
-get '/rss/job/:id' => sub {
-  my $c = shift;
-  #extract
-  my $wscall = $c->req->json;
-  my $intent = $wscall->{request}->{intent}->{name} || 0;
-  my $slots  = $wscall->{request}->{intent}->{slots} || 0; 
-  my @info; 
-  $log->debug(Dumper(\$c->req));
-  $log->debug($wscall);
-
-  my $ws_response = generate_rss_json(@info);
-
- render_json($c, $ws_response);
+  elsif ( $intent eq "buildReport" ) {
+    my $ws_response = build_report();
+    #$log->debug("ws_response: ".$ws_response);
+    render_json($c, $ws_response);
+  }
 
 };
 
@@ -101,7 +92,7 @@ sub delete_job {
 
 sub cancel_job {
   my ($job_id) = @_;
-  my $job_query = "/usr/share/openqa/script/client --host $host --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'";
+  my $job_query = "/usr/share/openqa/script/client --host $host --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\n'";
   my $ret;
   $log->debug("job_query: ".$job_query);
   my $job_state = `$job_query`;
@@ -124,7 +115,7 @@ sub cancel_job {
     }
 
   } else {
-      $response = ($ret=~ /^ERROR/)? "I can not cancel job $job_id because it is not there" : "I can not cancel job $job_id because it is in state $job_state";
+      $response = (!$ret)? "I can not cancel job $job_id because it is not there" : "I can not cancel job $job_id because it is in state $job_state";
       $log->debug("response: ".$response);
   }
 
@@ -165,6 +156,16 @@ sub clone_job {
   }
   $log->debug("response: ".$response);
   return $response;
+}
+
+sub build_report {
+
+  my $ua = Mojo::UserAgent->new;
+  my $tx = $ua->get('https://openqa.opensuse.org/group_overview/1.json' => {Accept => 'application/json'});
+  my $res = $tx->result->json;
+
+  return generate_json_response("Here's your report for ". $res->{group}{name}." there is a total of ".$res->{max_jobs});
+
 }
 
 sub render_json {
