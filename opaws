@@ -34,10 +34,16 @@ post '/' => sub {
     $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
   }
-
   elsif ( $intent eq "restartJob" ) {
     my $job_id = $slots->{id}->{value};
     $response = restart_job($job_id);
+    my $ws_response = generate_json_response($response);
+    $log->debug("ws_response: ".$ws_response);
+    render_json($c, $ws_response);
+  }
+  elsif ( $intent eq "deleteJob" ) {
+    my $job_id = $slots->{id}->{value};
+    $response = delete_job($job_id);
     my $ws_response = generate_json_response($response);
     $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
@@ -72,6 +78,23 @@ get '/rss/job/:id' => sub {
 =head2 helper functions
   functions for actually interacting with stuff
 =cut
+
+sub delete_job {
+  my ($job_id) = @_;
+  my $response = '';
+  my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id delete";
+  my $ret = `$cmd`;
+  $log->debug("ret: ".$ret);
+  if ($ret =~ /.*error.*/) {
+      $response = "I can not delete job $job_id";
+      $log->debug("response: ".$response);
+  }
+  else {
+    $response = "Job $job_id deleted";
+    $log->debug("response: ".$response);
+  }
+  return $response;
+}
 
 sub cancel_job {
   my ($job_id) = @_;
