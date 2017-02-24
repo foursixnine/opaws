@@ -163,9 +163,21 @@ sub build_report {
   my $ua = Mojo::UserAgent->new;
   my $tx = $ua->get('https://openqa.opensuse.org/group_overview/1.json' => {Accept => 'application/json'});
   my $res = $tx->result->json;
+  my $builds = $res->{build_results};
 
-  return generate_json_response("Here's your report for ". $res->{group}{name}." there is a total of ".$res->{max_jobs});
+  # foreach my $build (@{$builds}){
+  # $log->debug($build->{build});
+  # }
 
+  my $latest = @{$builds}[0];
+  my $message = "Here's your report for the latest ". $res->{group}{name} ." build. There's a total of ". $res->{max_jobs} . " jobs, with following results: ";
+  $message .= ($latest->{failed} > 0)? $latest->{failed}." Failed jobs. " : "No failed jobs. ";
+  $message .= ($latest->{softfailed} > 0)? $latest->{softfailed}." Soft failures. " : "No soft failures. ";
+  $message .= " and ";
+  $message .= ($latest->{passed} > 0)? $latest->{passed}." Jobs passing. " : "No sucessful jobs. ";
+
+
+  return generate_json_response($message);
 }
 
 sub render_json {
