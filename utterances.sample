@@ -1,12 +1,12 @@
 # Take a look at https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/defining-the-voice-interface
-cloneJob clone {id}
-cloneJob clone job {id}
-cloneJob clone number {id}
-cloneJob clone job number {id}
+cloneJob clone {id} from {src}
+cloneJob clone number {id} from {src}
+cloneJob clone job {id} from {src}
+cloneJob clone job number {id} from {src}
 restartJob restart {id}
 restartJob restart job {id}
-restartJob restart number {id}
 restartJob restart job number {id}
+restartJob restart number {id}
 cancelJob cancel {id}
 cancelJob cancel job {id}
 cancelJob cancel number {id}
@@ -15,3 +15,5 @@ deleteJob delete {id}
 deleteJob delete job {id}
 deleteJob delete number {id}
 deleteJob delete job number {id}
+buildReport give me a report
+buildReport give me the last build report
