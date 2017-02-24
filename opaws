@@ -22,7 +22,7 @@ post '/' => sub {
   my $slots  = $wscall->{request}->{intent}->{slots}; 
 
 
-  $log->debug(Dumper($wscall));
+  $log->debug("wscall: ". Dumper($wscall));
 
   if ( $intent eq "cloneJob" ) {
 
@@ -30,18 +30,16 @@ post '/' => sub {
     my $job_id = $slots->{id}->{value};
 
     $response = clone_job($job_id, $src_host);
-    $log->debug($response);
     my $ws_response = generate_json_response($response);
-    $log->debug($ws_response);
+    $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
   }
 
   elsif ( $intent eq "restartJob" ) {
     my $job_id = $slots->{id}->{value};
     $response = restart_job($job_id);
-    $log->debug($response);
     my $ws_response = generate_json_response($response);
-    $log->debug($ws_response);
+    $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
   }
 
@@ -71,11 +69,13 @@ get '/rss/job/:id' => sub {
 sub restart_job {
   my ($job_id) = @_;
   my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id/restart post";
-  $log->debug($cmd);
+
+  $log->debug("cmd: ".$cmd);
   my $response = `$cmd`;
   ($response) = split /,/, $response;
   $response =~ s/[^0-9]//g;
   $response = "Restart Job $job_id as ".$response;
+  $log->debug("response: ".$response);
   return $response;
 }
 
@@ -83,10 +83,12 @@ sub clone_job {
   my ($job_id, $src_host) = @_;
   $src_host = "https://openqa.".$src_host.".org";
   my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
-  $log->debug($cmd);
+
+  $log->debug("cmd: ".$cmd);
   my $response = `$cmd`;
   $response =~ s/#/Number /;
   ($response) = split /:/, $response;
+  $log->debug("response: ".$response);
   return $response;
 }
 
