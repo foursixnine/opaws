@@ -79,14 +79,15 @@ get '/rss/job/:id' => sub {
   functions for actually interacting with stuff
 =cut
 
+my $host = "http://openqa.eureka.lab.zarate.net.ve";
+
 sub delete_job {
   my ($job_id) = @_;
   my $response = '';
-  my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id delete";
+  my $cmd = "/usr/share/openqa/script/client --host $host jobs/$job_id delete";
   my $ret = `$cmd`;
   $log->debug("cmd: ".$cmd);
   $log->debug("return: ".$ret);
-  $log->debug("ret: ".$ret);
   if ($ret =~ /.*error.*/) {
       $response = "I can not delete job $job_id";
       $log->debug("response: ".$response);
@@ -100,13 +101,13 @@ sub delete_job {
 
 sub cancel_job {
   my ($job_id) = @_;
-  my $job_query = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'"; 
+  my $job_query = "/usr/share/openqa/script/client --host $host --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'"; 
   $log->debug("job_query: ".$job_query);
   my $job_state = `$job_query`;
   my $response = '';
   $log->debug("job_state: ".$job_state);
   if ($job_state =~ /scheduled|running/) {
-    my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id/cancel post";
+    my $cmd = "/usr/share/openqa/script/client --host $host jobs/$job_id/cancel post";
     $response = "Cancelled $job_state job $job_id";
     $log->debug("response: ".$response);
   }
@@ -120,7 +121,7 @@ sub cancel_job {
 
 sub restart_job {
   my ($job_id) = @_;
-  my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id/restart post";
+  my $cmd = "/usr/share/openqa/script/client --host $host jobs/$job_id/restart post";
 
   $log->debug("cmd: ".$cmd);
   my $response = `$cmd`;
@@ -139,7 +140,7 @@ sub restart_job {
 sub clone_job {
   my ($job_id, $src_host) = @_;
   $src_host = "https://openqa.".$src_host.".org";
-  my $cmd = "/usr/share/openqa/script/clone_job.pl --host http://openqa.eureka.lab.zarate.net.ve --skip-download --from $src_host $job_id";
+  my $cmd = "/usr/share/openqa/script/clone_job.pl --host $host --skip-download --from $src_host $job_id";
 
   $log->debug("cmd: ".$cmd);
   my $response = `$cmd`;
