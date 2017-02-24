@@ -173,8 +173,11 @@ sub build_report {
   my $message = "Here's your report for the latest ". $res->{group}{name} ." build. There's a total of ". $res->{max_jobs} . " jobs, with following results: ";
   $message .= ($latest->{failed} > 0)? $latest->{failed}." Failed jobs. " : "No failed jobs. ";
   $message .= ($latest->{softfailed} > 0)? $latest->{softfailed}." Soft failures. " : "No soft failures. ";
+  $message .= ($latest->{skipped} > 0)? $latest->{skipped}." skipped jobs. " : "";
   $message .= " and ";
   $message .= ($latest->{passed} > 0)? $latest->{passed}." Jobs passing. " : "No sucessful jobs. ";
+
+  $message .= "Also you might want to ask for a report later, there are ".$latest->{unfinished}." pending jobs." if $latest->{unfinished};
 
 
   return generate_json_response($message);
