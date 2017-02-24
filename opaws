@@ -101,15 +101,18 @@ sub delete_job {
 
 sub cancel_job {
   my ($job_id) = @_;
-  my $job_query = "/usr/share/openqa/script/client --host $host --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'"; 
+  my $job_query = "/usr/share/openqa/script/client --host $host --json-output jobs/$job_id get | jq -r '.job.state' | tr -d '\\\n'";
+  my $ret;
   $log->debug("job_query: ".$job_query);
   my $job_state = `$job_query`;
   my $response = '';
   $log->debug("job_state: ".$job_state);
+
+  $ret = $job_state;
+
   if ($job_state =~ /scheduled|running/) {
     my $cmd = "/usr/share/openqa/script/client --host $host jobs/$job_id/cancel post";
-    my $ret = `$cmd`;
-
+    $ret = `$cmd`;
     if ($ret=~ /.*result.*/){
       $response = "Cancelled $job_state job $job_id";
       $log->debug("response: ".$response);
@@ -121,7 +124,7 @@ sub cancel_job {
     }
 
   } else {
-      $response = "I can not cancel job $job_id because it is in state $job_state";
+      $response = ($ret=~ /^ERROR/)? "I can not cancel job $job_id because it is not there" : "I can not cancel job $job_id because it is in state $job_state";
       $log->debug("response: ".$response);
   }
 
