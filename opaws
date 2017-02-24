@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 use Mojo::Log;
-use Mojo::JSON qw(decode_json encode_json);
+use Mojo::JSON qw(decode_json encode_json from_json);
+#use JSON;
 use Data::Dumper;
 my $log = Mojo::Log->new;
 
@@ -15,38 +16,52 @@ plugin 'PODRenderer';
 post '/' => sub {
   my $c = shift;
   my $response;
+  #extract
   my $wscall = $c->req->json;
   my $intent = $wscall->{request}->{intent}->{name};
   my $slots  = $wscall->{request}->{intent}->{slots}; 
-  my $src_host = $slots->{src}->{value};
-  my $job_id = $slots->{id}->{value};
+
 
   $log->debug(Dumper($wscall));
 
   if ( $intent eq "cloneJob" ) {
 
+    my $src_host = $slots->{src}->{value};
+    my $job_id = $slots->{id}->{value};
+
     $response = clone_job($job_id, $src_host);
     $log->debug($response);
-    
-    my $json = generate_json_response($response);
-    $log->debug($response);
-    
-    my $ws_response = decode_json($json);
-    $log->debug($ws_response);
-    render_json($c, $ws_response);
-  } 
-  elsif ( $intent eq "restartJob" ) {
-    $response = restart_job($job_id, $src_host);
-    $log->debug($response);
-    
-    my $json = generate_json_response($response);
-    $log->debug($response);
-    
-    my $ws_response = decode_json($json);
+    my $ws_response = generate_json_response($response);
     $log->debug($ws_response);
     render_json($c, $ws_response);
   }
-  $response = undef;
+
+  elsif ( $intent eq "restartJob" ) {
+    my $job_id = $slots->{id}->{value};
+    $response = restart_job($job_id);
+    $log->debug($response);
+    my $ws_response = generate_json_response($response);
+    $log->debug($ws_response);
+    render_json($c, $ws_response);
+  }
+
+};
+
+
+get '/rss/job/:id' => sub {
+  my $c = shift;
+  #extract
+  my $wscall = $c->req->json;
+  my $intent = $wscall->{request}->{intent}->{name} || 0;
+  my $slots  = $wscall->{request}->{intent}->{slots} || 0; 
+  my @info; 
+  $log->debug(Dumper(\$c->req));
+  $log->debug($wscall);
+
+  my $ws_response = generate_rss_json(@info);
+
+ render_json($c, $ws_response);
+
 };
 
 =head2 helper functions
@@ -54,14 +69,13 @@ post '/' => sub {
 =cut
 
 sub restart_job {
-  my ($job_id, $src_host) = @_;
-  $src_host = "https://openqa.eureka.lab.zarate.net.ve";
-  my $cmd = "/usr/share/openqa/script/client jobs/$job_id/restart post";
+  my ($job_id) = @_;
+  my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id/restart post";
   $log->debug($cmd);
   my $response = `$cmd`;
   ($response) = split /,/, $response;
   $response =~ s/[^0-9]//g;
-  $response = "Restart Job $job_id from $src_host as ".$response;
+  $response = "Restart Job $job_id as ".$response;
   return $response;
 }
 
@@ -94,7 +108,30 @@ sub generate_json_response {
        }
      }';
     
-     return encode_json($json);
+     return from_json($json);
+}
+
+sub generate_rss_json {
+  my $imput = shift;
+  my $json = '
+[
+  {
+    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_1",
+    "updateDate": "2016-04-10T00:00:00.0Z",
+    "titleText": "Multi Item JSON (TTS)",
+    "mainText": "This channel has multiple TTS JSON items. This is the first item."
+   },
+  {
+    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_2",
+    "updateDate": "2016-04-10T00:00:00.0Z",
+    "titleText": "Multi Item JSON (TTS)",
+    "mainText": "This channel has multiple TTS JSON items. This is the second item."
+  }
+]
+';
+  return from_json($json);
+
+
 }
 
 app->secrets(["Skynet is comming! :)"]);
