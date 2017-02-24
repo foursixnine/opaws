@@ -108,10 +108,19 @@ sub cancel_job {
   $log->debug("job_state: ".$job_state);
   if ($job_state =~ /scheduled|running/) {
     my $cmd = "/usr/share/openqa/script/client --host $host jobs/$job_id/cancel post";
-    $response = "Cancelled $job_state job $job_id";
-    $log->debug("response: ".$response);
-  }
-  else {
+    my $ret = `$cmd`;
+
+    if ($ret=~ /.*result.*/){
+      $response = "Cancelled $job_state job $job_id";
+      $log->debug("response: ".$response);
+    } 
+
+    if ($ret=~ /.*error.*/) {
+      $response = "I can not cancel job $job_id because there was an error";
+      $log->debug("response: ".$response);
+    }
+
+  } else {
       $response = "I can not cancel job $job_id because it is in state $job_state";
       $log->debug("response: ".$response);
   }
