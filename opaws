@@ -74,7 +74,12 @@ sub restart_job {
   my $response = `$cmd`;
   ($response) = split /,/, $response;
   $response =~ s/[^0-9]//g;
-  $response = "Restart Job $job_id as ".$response;
+  if (!$response) {
+      $response = "Sorry, I was not able to restart job $job_id";
+  }
+  else {
+    $response = "Restart Job $job_id as ".$response;
+  }
   $log->debug("response: ".$response);
   return $response;
 }
@@ -86,8 +91,13 @@ sub clone_job {
 
   $log->debug("cmd: ".$cmd);
   my $response = `$cmd`;
-  $response =~ s/#/Number /;
-  ($response) = split /:/, $response;
+  if ($response =~ /^Created job .*/) {
+    $response =~ s/#/Number /;
+    ($response) = split /:/, $response;
+  }
+  else {
+    $response = "Sorry, I was not able to clone the job";
+  }
   $log->debug("response: ".$response);
   return $response;
 }
