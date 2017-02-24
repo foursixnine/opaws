@@ -83,9 +83,11 @@ sub cancel_job {
   if ($job_state =~ /scheduled|running/) {
     my $cmd = "/usr/share/openqa/script/client --host http://openqa.eureka.lab.zarate.net.ve jobs/$job_id/cancel post";
     $response = "Cancelled $job_state job $job_id";
+    $log->debug("response: ".$response);
   }
   else {
       $response = "I can not cancel job $job_id because it is in state $job_state";
+      $log->debug("response: ".$response);
   }
 
   return $response;
