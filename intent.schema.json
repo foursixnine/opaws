@@ -17,6 +17,22 @@
         }
       ]
     },
+      "intent": "addComment",
+      "slots": [
+        {
+          "name": "id",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "src",
+          "type": "SERVERS"
+        },
+        {
+          "name": "content",
+          "type": "CONTENT",
+        }
+      ]
+    },
     {
       "intent": "cancelJob",
       "slots": [
