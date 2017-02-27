@@ -16,7 +16,7 @@
           "type": "SERVERS"
         }
       ]
-    },
+    },{
       "intent": "addComment",
       "slots": [
         {
