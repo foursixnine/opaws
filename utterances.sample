@@ -17,10 +17,8 @@ deleteJob delete number {id}
 deleteJob delete job number {id}
 buildReport give me a report
 buildReport give me the last build report
-addComment add comment to job {id} from {src} {text}
-addComment add comment to job {id} from {src} with following content: {text}
-addComment add comment to job number {id} from {src} {text}
-addComment add comment to job number {id} from {src} with following content: {text}
-addComment add comment to {src} job {id} {text}
-addComment add comment to {src} job number {id} {text}
-addComment add comment to {src} job number {id} with following content: {text}
+addComment add comment to job {id} {text}
+addComment add comment to job {id} with following content {text}
+addComment comment {text} on job {id}
+addComment comment on job {id} {text}
+addComment write on job {id} {text}
