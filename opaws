@@ -169,6 +169,7 @@ sub build_report {
   # $log->debug($build->{build});
   # }
 
+  $res->{group}{name} =~ s/SUSE/ SUSE/g;
   my $latest = @{$builds}[0];
   my $message = "Here's your report for the latest ". $res->{group}{name} ." build. There's a total of ". $res->{max_jobs} . " jobs, with following results: ";
   $message .= ($latest->{failed} > 0)? $latest->{failed}." Failed jobs. " : "No failed jobs. ";
