@@ -1,0 +1,29 @@
+{
+  "session": {
+    "sessionId": "SessionId.08e4edc1-0256-4fa9-bc44-f27456be4209",
+    "application": {
+      "applicationId": "amzn1.ask.skill.7e80706d-9e7b-4e35-a3ea-b873d633435f"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AGSNEK7RVYG3K7DEMQLYKLSQN4CKLYCEGTTDD7M3454R6YWLUURICHRMPNN6OAYBZBWRG2EBF35PYWXSPGD26URL6YTUNOURF2BWRABWS6GSMGNXIKB24B25GKNGNFCGXVMQLBSJEXKHFNWXCFWPW36NA3GZFJ7BPQ5YWBOWHRMYP6IR4MFLZRLUVJ3HYVOAPNTP4TYZW3LSTRQ"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.a1ec4cbd-b650-410c-860a-1a2a6aeb814e",
+    "locale": "en-US",
+    "timestamp": "2017-02-22T18:51:56Z",
+    "intent": {
+      "name": "deleteJob",
+      "slots": {
+        "id": {
+          "name": "id",
+          "value": "200"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
