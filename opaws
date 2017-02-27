@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 use Mojo::Log;
-use Mojo::JSON qw(decode_json encode_json from_json);
+use Mojo::JSON qw(decode_json encode_json from_json to_json);
 #use JSON;
 use Data::Dumper;
 use Mojo::UserAgent;
@@ -59,10 +59,9 @@ post '/' => sub {
   }
   elsif ( $intent eq "addComment" ) {
     my $job_id = $slots->{id}->{value};
-    my $src_host = $slots->{src}->{value};
-    my $text = $slots->{content}->{value};
+    my $src_host = "http://openqa.eureka.lab.zarate.net.ve"; #$slots->{src}->{value};
+    my $text = $slots->{text}->{value};
     my $ws_response = add_comment($job_id, $src_host, $text);
-    #$log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
   }
   elsif ( $intent eq "buildReport" ) {
@@ -169,7 +168,6 @@ sub add_comment {
   my ($job_id, $src_host, $content) = @_;
   my $response = '';
   my $ret = '';
-  $src_host = "https://openqa.".$src_host.".org";
   my $cmd = "/usr/share/openqa/script/client --host $src_host jobs/$job_id/comments post text='$content'";
   $log->debug("cmd: ".$cmd);
   
@@ -183,7 +181,7 @@ sub add_comment {
     $log->debug("response: ".$response);
   }
   
-  return $response;
+  return generate_json_response($response);
 }
 
 sub build_report {
@@ -214,6 +212,7 @@ sub build_report {
 
 sub render_json {
     my ($c, $resp) = @_;
+    $log->debug("Rendering: ". to_json($resp));
     $c->render(json => $resp);
     $c->rendered(200);
 }
