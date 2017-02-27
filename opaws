@@ -23,9 +23,6 @@ post '/' => sub {
   my $intent = $wscall->{request}->{intent}->{name};
   my $slots  = $wscall->{request}->{intent}->{slots}; 
 
-
-  #$log->debug("wscall: ". Dumper($wscall));
-
   if ( $intent eq "cloneJob" ) {
 
     my $src_host = $slots->{src}->{value};
@@ -124,7 +121,6 @@ sub cancel_job {
       $response = (!$ret)? "I can not cancel job $job_id because it is not there" : "I can not cancel job $job_id because it is in state $job_state";
       $log->debug("response: ".$response);
   }
-
   return $response;
 }
 
@@ -233,28 +229,29 @@ sub generate_json_response {
      return from_json($json);
 }
 
-sub generate_rss_json {
-  my $imput = shift;
-  my $json = '
-[
-  {
-    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_1",
-    "updateDate": "2016-04-10T00:00:00.0Z",
-    "titleText": "Multi Item JSON (TTS)",
-    "mainText": "This channel has multiple TTS JSON items. This is the first item."
-   },
-  {
-    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_2",
-    "updateDate": "2016-04-10T00:00:00.0Z",
-    "titleText": "Multi Item JSON (TTS)",
-    "mainText": "This channel has multiple TTS JSON items. This is the second item."
-  }
-]
-';
-  return from_json($json);
-
-
-}
+## TODO: not_implemented right now
+## the idea was to use the flash briefing skill instead of a custom skill
+## but there was some issue on the amazon side
+#sub generate_rss_json {
+#  my $input = shift;
+#  my $json = '
+#[
+#  {
+#    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_1",
+#    "updateDate": "2016-04-10T00:00:00.0Z",
+#    "titleText": "Multi Item JSON (TTS)",
+#    "mainText": "This channel has multiple TTS JSON items. This is the first item."
+#   },
+#  {
+#    "uid": "EXAMPLE_CHANNEL_MULTI_ITEM_JSON_TTS_2",
+#    "updateDate": "2016-04-10T00:00:00.0Z",
+#    "titleText": "Multi Item JSON (TTS)",
+#    "mainText": "This channel has multiple TTS JSON items. This is the second item."
+#  }
+#]
+#';
+#  return from_json($json);
+#}
 
 app->secrets(["Skynet is comming! :)"]);
 app->start;
