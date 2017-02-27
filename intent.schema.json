@@ -28,7 +28,7 @@
           "type": "SERVERS"
         },
         {
-          "name": "content",
+          "name": "text",
           "type": "CONTENT"
         }
       ]
