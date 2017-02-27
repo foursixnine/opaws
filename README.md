@@ -13,11 +13,11 @@ Allow an Amazon Echo to use OpenQA's API by using intents for common tasks
 ## Usage
 
 * Clone this repo and run the server on a machine which has openQA installed
-** replace openqa.eureka.lab.zarate.net.ve with the name of your own openqa instance
-** Set up your apache to support both: openqa and opaws (Take a look at apache2 directory)
+ * replace openqa.eureka.lab.zarate.net.ve with the name of your own openqa instance
+ * Set up your apache to support both: openqa and opaws (Take a look at apache2 directory)
 * Connect your server as an endpoint to your Alexa Skill on Amazon Developers' Account
-** Configure your skill to use https endpoint (You can use the same endpoint for both zones)
-** You can use [letsencrypt](https://letsencrypt.org/) service to get a valid ssl certificate
+ * Configure your skill to use https endpoint (You can use the same endpoint for both zones)
+ * You can use [letsencrypt](https://letsencrypt.org/) service to get a valid ssl certificate
 * Set up the Skill by using the Intents, utterances and custom slots defined in the alexa-skill-configuration directory
 * Run opaws: `./opaws daemon`
 * Test your skill on your developer console on amazon
