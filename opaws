@@ -57,7 +57,14 @@ post '/' => sub {
     $log->debug("ws_response: ".$ws_response);
     render_json($c, $ws_response);
   }
-
+  elsif ( $intent eq "addComment" ) {
+    my $job_id = $slots->{id}->{value};
+    my $src_host = $slots->{src}->{value};
+    my $text = $slots->{content}->{value};
+    my $ws_response = add_comment($job_id, $src_host, $text);
+    #$log->debug("ws_response: ".$ws_response);
+    render_json($c, $ws_response);
+  }
   elsif ( $intent eq "buildReport" ) {
     my $ws_response = build_report();
     #$log->debug("ws_response: ".$ws_response);
@@ -155,6 +162,27 @@ sub clone_job {
     $response = "Sorry, I was not able to clone the job";
   }
   $log->debug("response: ".$response);
+  return $response;
+}
+
+sub add_comment {
+  my ($job_id, $src_host, $content) = @_;
+  my $response = '';
+  my $ret = '';
+  $src_host = "https://openqa.".$src_host.".org";
+  my $cmd = "/usr/share/openqa/script/client --host $src_host jobs/$job_id/comments post text='$content'";
+  $log->debug("cmd: ".$cmd);
+  
+  $ret = `$cmd`;
+  if ($ret =~ /.*error.*/) {
+    $response = "Sorry, I could not find job number $job_id";
+    $log->debug("response: ".$response);
+  }
+  else {
+    $response = "Created comment for job number $job_id";
+    $log->debug("response: ".$response);
+  }
+  
   return $response;
 }
 
